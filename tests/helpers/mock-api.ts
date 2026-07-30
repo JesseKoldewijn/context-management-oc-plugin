@@ -7,6 +7,8 @@ export type MockSessionState = {
   routeName: "home" | "session"
   sessionID: string
   contextWindow: number
+  sidebar: "auto" | "hide"
+  terminalWidth: number
 }
 
 export function makeAssistant(partial: {
@@ -38,6 +40,8 @@ export function createMockApi(initial?: Partial<MockSessionState>) {
     routeName: "session",
     sessionID: "ses_1",
     contextWindow: 200_000,
+    sidebar: "auto",
+    terminalWidth: 80,
     ...initial,
   }
 
@@ -50,6 +54,7 @@ export function createMockApi(initial?: Partial<MockSessionState>) {
     sound: true,
   }))
   const register = vi.fn(() => "context-management.limit")
+  const kvStore = new Map<string, unknown>([["sidebar", state.sidebar]])
 
   const api = {
     route: {
@@ -156,6 +161,27 @@ export function createMockApi(initial?: Partial<MockSessionState>) {
       install: async () => {},
       mode: () => "dark" as const,
       ready: true,
+    },
+    kv: {
+      get: (key: string, fallback?: unknown) => {
+        if (key === "sidebar") return state.sidebar
+        return kvStore.has(key) ? kvStore.get(key) : fallback
+      },
+      set: (key: string, value: unknown) => {
+        kvStore.set(key, value)
+        if (key === "sidebar" && (value === "auto" || value === "hide")) {
+          state.sidebar = value
+        }
+      },
+      ready: true,
+    },
+    renderer: {
+      get terminalWidth() {
+        return state.terminalWidth
+      },
+      get width() {
+        return state.terminalWidth
+      },
     },
   } as unknown as TuiPluginApi
 

@@ -1,18 +1,39 @@
 # Context Management OpenCode Plugin
 
-OpenCode TUI plugin that shows your **configured context alert threshold** in the sidebar and bottom bar, and notifies you when usage reaches it. OpenCode’s built-in UI already shows live context progress — this plugin does not duplicate that.
+Set a **context alert threshold** for OpenCode and get notified when you cross it. OpenCode's built-in sidebar already shows live context usage — this plugin adds the configured limit display and crossing alerts.
+
+## Why this exists
+
+OpenCode shows how much context you're using, but it doesn't let you say "tell me when I hit 80%" or "warn me at 100,000 tokens". That's what this plugin does.
+
+- **Set a limit** — absolute tokens and/or percent of the model's context window
+- **See it in the UI** — your limit is shown in the sidebar and bottom bar, turning red when crossed
+- **Get notified** — toast and desktop notification fire when you cross the threshold (once per crossing, re-arms after `/compact`)
+
+## How it looks
+
+When usage is under your limit:
 
 ```
-Sidebar                  Bottom bar (app_bottom)
-Limit                    limit · 100,000 tokens · 80% of context
-100,000 tokens · 80% of context
+Sidebar           Bottom bar
+─────────         ──────────────
+Limit             limit · 100,000 tokens · 80% of context
+100,000 tokens
+· 80% of context
 ```
 
-## Features
+When usage crosses the limit, the label turns red, and a toast + desktop notification fires. After you `/compact` and usage drops below the limit, the arm resets and can fire again.
 
-- **Sidebar + bottom bar** — displays configured `maxTokens` and/or `maxPercent` (turns red when over)
-- **Configurable limits** — absolute tokens and/or percent of the model context window
-- **Toast + desktop notification** — once per threshold crossing (re-arms after usage drops, e.g. after `/compact`)
+## Use cases
+
+- **Budget awareness** — stay under a token ceiling for cost-sensitive work
+- **Context window management** — know when you're crowding the model's context window before quality degrades
+- **Compaction cue** — use the notification as a signal to run `/compact` mid-conversation
+- **Running close to the edge** — set a high percent threshold so you're alerted only when you're truly pushing the limit
+
+## How notifications work
+
+The plugin fires once per threshold crossing — not on every message update. If you cross 80% usage, you get one notification. If you then `/compact` and usage drops below 80%, the arm resets. If usage climbs back above 80%, you get another notification. This means no spam but you won't miss a re-crossing.
 
 ## Prerequisites
 
@@ -53,6 +74,8 @@ Relative paths resolve against the config file that declares them. The package e
 Omit options entirely to use **maxTokens: 100000** only.
 
 Notification fires when **any** enabled limit is reached.
+
+**When to use which?** `maxTokens` gives you a hard ceiling independent of the model (useful for cost budgets). `maxPercent` scales with the model's context window (useful for quality management across models with different capacities). Use both together for belt-and-suspenders.
 
 ### Desktop notifications
 

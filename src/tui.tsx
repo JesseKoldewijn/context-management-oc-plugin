@@ -7,10 +7,11 @@ import type {
   TuiThemeCurrent,
 } from "@opencode-ai/plugin/tui"
 import { TextAttributes } from "@opentui/core"
-import { createMemo } from "solid-js"
+import { createMemo, Show } from "solid-js"
 import { wireNotifications } from "./notify.js"
 import { normalizeOptions, type NormalizedOptions } from "./options.js"
 import { isOverLimit } from "./session.js"
+import { isSidebarVisibleFromApi } from "./sidebar.js"
 import { bottomBarLimitModel, sidebarLimitModel } from "./view-model.js"
 
 /** Sidebar: configured alert threshold only (OpenCode already shows context progress). */
@@ -38,22 +39,25 @@ export function SidebarLimit(props: {
   )
 }
 
-/** Bottom bar (`app_bottom`): compact one-line configured threshold. */
+/** Bottom bar (`app_bottom`): compact threshold — only when the sidebar is not open. */
 export function BottomBarLimit(props: {
   api: TuiPluginApi
   theme: TuiThemeCurrent
   options: NormalizedOptions
 }) {
+  const sidebarOpen = createMemo(() => isSidebarVisibleFromApi(props.api))
   const model = createMemo(() =>
     bottomBarLimitModel(props.options, isOverLimit(props.api, props.options), props.theme),
   )
 
   return (
-    <box paddingLeft={1} paddingRight={1}>
-      <text fg={model().color} wrapMode="none">
-        {model().label}
-      </text>
-    </box>
+    <Show when={!sidebarOpen()}>
+      <box paddingLeft={1} paddingRight={1}>
+        <text fg={model().color} wrapMode="none">
+          {model().label}
+        </text>
+      </box>
+    </Show>
   )
 }
 
