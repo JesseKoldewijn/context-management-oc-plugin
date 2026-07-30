@@ -98,11 +98,15 @@ When you cross the limit, the label turns red and you get a toast (plus a deskto
 
 ## Updating
 
+If you installed from **GitHub Packages**, keep the `~/.npmrc` scope/token from [step 1](#1-install-from-github-packages), then:
+
 ```bash
 npm install -g @jessekoldewijn/context-management-oc-plugin@latest
 ```
 
-Or from git:
+Without that registry config, npm will look on the public registry (where this package is not published).
+
+If you installed from **git** (no Packages auth), update with:
 
 ```bash
 npm install -g github:JesseKoldewijn/context-management-oc-plugin
