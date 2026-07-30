@@ -45,3 +45,23 @@ npm run typecheck       # tsc --noEmit
 npm run lint            # oxlint --type-aware
 npm run format:check    # oxfmt --check
 ```
+
+## Pull requests
+
+When a PR is ready for human review (CI green, no unresolved review threads you still need to fix, description complete), add the **`ready-for-review`** label:
+
+```bash
+gh pr edit <number> --add-label ready-for-review
+```
+
+Do not add that label while the PR is still draft, failing CI, or blocked on your own follow-ups.
+
+## Releases
+
+Versioning is handled by [semantic-release](https://github.com/semantic-release/semantic-release) on pushes to `main` that include releasable commits (see `.github/workflows/release.yml`).
+
+- **Conventional Commits** — squash-merge PR titles are what get analyzed. Use prefixes such as `feat:`, `fix:`, `perf:`, `feat!:` / `BREAKING CHANGE:`, `docs:`, `chore:`. Releases are cut for `feat` (minor), `fix` / `perf` (patch), and breaking changes (major); `docs` / `chore` alone do not release.
+- **Changelog** — `CHANGELOG.md` is updated automatically when semantic-release creates a release (not on every merge to `main`).
+- **CI loop avoidance** — release commits are `chore(release): x.y.z [skip ci]` so CI and the release workflow do not re-run.
+- **Baseline** — the first published semver baseline is `v0.1.0` (matches `package.json`). If that tag is missing on `main`, create an annotated tag once after landing the release workflow so the next `fix:`/`feat:` produces `0.1.1` / `0.2.0` instead of a surprising first cut.
+- **Publish** — npm publish to GitHub Packages is not wired yet (`npmPublish: false`); version bumps and GitHub Releases only.

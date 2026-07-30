@@ -58,7 +58,7 @@ describe("e2e package contract", () => {
       exports: { "./tui": string }
       engines: { opencode: string }
     }
-    expect(pkg.name).toBe("context-management-oc-plugin")
+    expect(pkg.name).toBe("@jessekoldewijn/context-management-oc-plugin")
     expect(pkg.exports["./tui"]).toBe("./dist/tui.tsx")
     expect(pkg.engines.opencode).toMatch(/>=\s*1\.4\.3/)
     await access(join(root, "src/tui.tsx"))
