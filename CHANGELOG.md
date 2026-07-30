@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/JesseKoldewijn/context-management-oc-plugin/compare/v0.2.0...v0.2.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* show Packages version via GitHub release badge ([#7](https://github.com/JesseKoldewijn/context-management-oc-plugin/issues/7)) ([a82393e](https://github.com/JesseKoldewijn/context-management-oc-plugin/commit/a82393e7c7b0f95ecfb533dc349d9402f62fd54c))
+
 # [0.2.0](https://github.com/JesseKoldewijn/context-management-oc-plugin/compare/v0.1.0...v0.2.0) (2026-07-30)
 
 
