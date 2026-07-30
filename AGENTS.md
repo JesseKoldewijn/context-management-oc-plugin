@@ -46,6 +46,16 @@ npm run lint            # oxlint --type-aware
 npm run format:check    # oxfmt --check
 ```
 
+## Pull requests
+
+When a PR is ready for human review (CI green, no unresolved review threads you still need to fix, description complete), add the **`ready-for-review`** label:
+
+```bash
+gh pr edit <number> --add-label ready-for-review
+```
+
+Do not add that label while the PR is still draft, failing CI, or blocked on your own follow-ups.
+
 ## Releases
 
 Versioning is handled by [semantic-release](https://github.com/semantic-release/semantic-release) on every push to `main` (see `.github/workflows/release.yml`).
