@@ -11,5 +11,5 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
-  "ignorePatterns": ["package-lock.json", "coverage", "dist"]
+  "ignorePatterns": ["package-lock.json", "coverage", "dist", "CHANGELOG.md"]
 }
