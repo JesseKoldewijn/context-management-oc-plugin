@@ -1,5 +1,8 @@
 # Context Management OpenCode Plugin
 
+[![CI](https://img.shields.io/github/actions/workflow/status/JesseKoldewijn/context-management-oc-plugin/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/JesseKoldewijn/context-management-oc-plugin/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+
 Set a **context alert threshold** for OpenCode and get notified when you cross it. OpenCode's built-in sidebar already shows live context usage — this plugin adds the configured limit display and crossing alerts.
 
 ## Why this exists
@@ -128,4 +131,4 @@ GitHub Actions (`.github/workflows/ci.yml`) runs **lint** (oxlint), **format** (
 
 ## License
 
-MIT
+[MIT](./LICENSE)
