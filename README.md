@@ -2,7 +2,6 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/JesseKoldewijn/context-management-oc-plugin/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/JesseKoldewijn/context-management-oc-plugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
-[![npm](https://img.shields.io/npm/v/context-management-oc-plugin?style=flat-square)](https://www.npmjs.com/package/context-management-oc-plugin)
 
 Set a **context alert threshold** for OpenCode and get notified when you cross it. OpenCode already shows live context usage — this plugin adds your configured limit in the UI and alerts you when you hit it.
 
@@ -10,10 +9,10 @@ Set a **context alert threshold** for OpenCode and get notified when you cross i
 
 Requires OpenCode >= 1.4.3 (TUI plugin system).
 
-### 1. Install globally
+### 1. Install from GitHub
 
 ```bash
-npm install -g context-management-oc-plugin
+npm install -g github:JesseKoldewijn/context-management-oc-plugin
 ```
 
 ### 2. Enable it in OpenCode
@@ -25,7 +24,7 @@ Add the plugin to your TUI config (`~/.config/opencode/tui.json` on macOS/Linux,
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "context-management-oc-plugin",
+      "@jessekoldewijn/context-management-oc-plugin",
       {
         "maxTokens": 100000,
         "maxPercent": 80,
@@ -83,7 +82,7 @@ When you cross the limit, the label turns red and you get a toast (plus a deskto
 ## Updating
 
 ```bash
-npm install -g context-management-oc-plugin@latest
+npm install -g github:JesseKoldewijn/context-management-oc-plugin
 ```
 
 Then restart OpenCode.
