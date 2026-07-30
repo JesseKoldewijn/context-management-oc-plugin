@@ -70,7 +70,7 @@ Toasts always work. Desktop attention also needs:
 
 ## How it works
 
-```
+```text
 Sidebar           Bottom bar (when sidebar is closed)
 ─────────         ──────────────
 Limit             limit · 100,000 tokens · 80% of context
