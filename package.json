@@ -39,6 +39,7 @@
     "@opencode-ai/sdk": "1.18.10",
     "@opentui/core": "0.4.5",
     "@opentui/solid": "0.4.5",
+    "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "^3.2.4",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
