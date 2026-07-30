@@ -64,4 +64,4 @@ Versioning is handled by [semantic-release](https://github.com/semantic-release/
 - **Changelog** — `CHANGELOG.md` is updated automatically when semantic-release creates a release (not on every merge to `main`).
 - **CI loop avoidance** — release commits are `chore(release): x.y.z [skip ci]` so CI and the release workflow do not re-run.
 - **Baseline** — the first published semver baseline is `v0.1.0` (matches `package.json`). If that tag is missing on `main`, create an annotated tag once after landing the release workflow so the next `fix:`/`feat:` produces `0.1.1` / `0.2.0` instead of a surprising first cut.
-- **Publish** — npm publish to GitHub Packages is not wired yet (`npmPublish: false`); version bumps and GitHub Releases only.
+- **Publish** — eligible releases are published to GitHub Packages (`https://npm.pkg.github.com`) as `@jessekoldewijn/context-management-oc-plugin` via `@semantic-release/npm` (`npmPublish: true`). The release job uses `packages: write` and a scoped `.npmrc` only in the release step (so `npm ci` still uses the public npm registry).

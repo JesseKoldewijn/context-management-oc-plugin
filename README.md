@@ -1,6 +1,7 @@
 # Context Management OpenCode Plugin
 
 [![CI](https://img.shields.io/github/actions/workflow/status/JesseKoldewijn/context-management-oc-plugin/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/JesseKoldewijn/context-management-oc-plugin/actions/workflows/ci.yml)
+[![GitHub Packages](https://img.shields.io/npm/v/@jessekoldewijn/context-management-oc-plugin?registry_uri=https%3A%2F%2Fnpm.pkg.github.com&label=GitHub%20Packages&style=flat-square)](https://github.com/JesseKoldewijn/context-management-oc-plugin/pkgs/npm/context-management-oc-plugin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
 
 Set a **context alert threshold** for OpenCode and get notified when you cross it. OpenCode already shows live context usage — this plugin adds your configured limit in the UI and alerts you when you hit it.
@@ -9,7 +10,23 @@ Set a **context alert threshold** for OpenCode and get notified when you cross i
 
 Requires OpenCode >= 1.4.3 (TUI plugin system).
 
-### 1. Install from GitHub
+### 1. Install from GitHub Packages
+
+Configure npm to use GitHub Packages for this scope (once per machine). Use a GitHub personal access token with `read:packages`:
+
+```bash
+# ~/.npmrc
+@jessekoldewijn:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+Then install:
+
+```bash
+npm install -g @jessekoldewijn/context-management-oc-plugin
+```
+
+Alternatively, install straight from the git repo (no Packages auth):
 
 ```bash
 npm install -g github:JesseKoldewijn/context-management-oc-plugin
@@ -80,6 +97,16 @@ Limit             limit · 100,000 tokens · 80% of context
 When you cross the limit, the label turns red and you get a toast (plus a desktop notification if attention is enabled). Alerts fire **once per crossing** — after `/compact` drops you back under the limit, the next crossing can notify again.
 
 ## Updating
+
+If you installed from **GitHub Packages**, keep the `~/.npmrc` scope/token from [step 1](#1-install-from-github-packages), then:
+
+```bash
+npm install -g @jessekoldewijn/context-management-oc-plugin@latest
+```
+
+Without that registry config, npm will look on the public registry (where this package is not published).
+
+If you installed from **git** (no Packages auth), update with:
 
 ```bash
 npm install -g github:JesseKoldewijn/context-management-oc-plugin
