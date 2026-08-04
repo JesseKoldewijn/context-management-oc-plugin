@@ -1,6 +1,6 @@
 {
   "name": "@jessekoldewijn/context-management-oc-plugin",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "OpenCode TUI sidebar plugin that shows a configured context threshold and notifies when it is reached",
   "keywords": [
     "context",

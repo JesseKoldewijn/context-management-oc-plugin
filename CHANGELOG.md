@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/JesseKoldewijn/context-management-oc-plugin/compare/v0.2.1...v0.3.0) (2026-08-04)
+
+
+### Features
+
+* add cost-based context limit ([#9](https://github.com/JesseKoldewijn/context-management-oc-plugin/issues/9)) ([9576f6c](https://github.com/JesseKoldewijn/context-management-oc-plugin/commit/9576f6ce1d7d3fe86a5d76ed427a345bef2697da))
+
 ## [0.2.1](https://github.com/JesseKoldewijn/context-management-oc-plugin/compare/v0.2.0...v0.2.1) (2026-07-30)
 
 
