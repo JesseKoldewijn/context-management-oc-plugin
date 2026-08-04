@@ -45,7 +45,7 @@ describe("plugin module contract", () => {
 describe("tui() registration", () => {
   it("registers sidebar_content and app_bottom slots with order 100", async () => {
     const mock = createMockApi()
-    await tui(mock.api, { maxTokens: 50_000, maxPercent: 80 }, meta)
+    await tui(mock.api, { maxTokens: 50_000, maxPercent: 80, maxCost: null }, meta)
 
     const registration = registeredSlots(mock.register)
     expect(registration.order).toBe(100)
@@ -68,7 +68,7 @@ describe("tui() registration", () => {
 
   it("unsubscribes on dispose", async () => {
     const mock = createMockApi()
-    await tui(mock.api, { maxTokens: 1 }, meta)
+    await tui(mock.api, { maxTokens: 1, maxCost: null }, meta)
     expect(mock.disposeFns.length).toBe(1)
 
     mock.state.messages = [
@@ -89,7 +89,7 @@ describe("tui() registration", () => {
 describe("wireNotifications integration", () => {
   it("toasts and notifies once on rising-edge maxTokens crossing", () => {
     const mock = createMockApi()
-    const unsub = wireNotifications(mock.api, { maxTokens: 100, maxPercent: null })
+    const unsub = wireNotifications(mock.api, { maxTokens: 100, maxPercent: null, maxCost: null })
 
     mock.state.messages = [
       makeAssistant({
@@ -124,7 +124,7 @@ describe("wireNotifications integration", () => {
 
   it("notifies on maxPercent crossing via message.removed data shape", () => {
     const mock = createMockApi({ contextWindow: 200 })
-    wireNotifications(mock.api, { maxTokens: null, maxPercent: 50 })
+    wireNotifications(mock.api, { maxTokens: null, maxPercent: 50, maxCost: null })
 
     mock.state.messages = [
       makeAssistant({
@@ -139,7 +139,7 @@ describe("wireNotifications integration", () => {
 
   it("re-arms after usage drops under the limit", () => {
     const mock = createMockApi()
-    wireNotifications(mock.api, { maxTokens: 100, maxPercent: null })
+    wireNotifications(mock.api, { maxTokens: 100, maxPercent: null, maxCost: null })
 
     mock.state.messages = [
       makeAssistant({
@@ -169,7 +169,7 @@ describe("wireNotifications integration", () => {
 
   it("ignores events without a session id", () => {
     const mock = createMockApi()
-    wireNotifications(mock.api, { maxTokens: 1, maxPercent: null })
+    wireNotifications(mock.api, { maxTokens: 1, maxPercent: null, maxCost: null })
     mock.state.messages = [
       makeAssistant({
         tokens: { input: 10, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },
@@ -181,7 +181,7 @@ describe("wireNotifications integration", () => {
 
   it("tracks sessions independently", () => {
     const mock = createMockApi()
-    wireNotifications(mock.api, { maxTokens: 100, maxPercent: null })
+    wireNotifications(mock.api, { maxTokens: 100, maxPercent: null, maxCost: null })
 
     mock.state.messages = [
       makeAssistant({
@@ -198,13 +198,57 @@ describe("wireNotifications integration", () => {
     mock.emit("message.updated", { properties: { sessionID: "ses_b" } })
     expect(mock.toast).toHaveBeenCalledTimes(1)
   })
+
+  it("notifies once for a cost-only crossing, then re-arms", () => {
+    const mock = createMockApi()
+    wireNotifications(mock.api, { maxTokens: null, maxPercent: null, maxCost: 1.5 })
+
+    const setCost = (cost: number) => {
+      mock.state.messages = [
+        makeAssistant({
+          cost,
+          tokens: { input: 1, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },
+        }),
+      ]
+    }
+
+    setCost(1.25)
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).not.toHaveBeenCalled()
+
+    setCost(1.5)
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(1)
+    const toast = mock.toast.mock.calls[0]?.[0] as { message?: string } | undefined
+    expect(String(toast?.message)).toContain("maxCost")
+
+    setCost(0.5)
+    mock.emit("message.removed", { properties: { sessionID: "ses_1" } })
+    setCost(2)
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(2)
+  })
+
+  it("combines cost with token and percent limits using OR logic", () => {
+    const mock = createMockApi({ contextWindow: 200 })
+    wireNotifications(mock.api, { maxTokens: 100, maxPercent: 90, maxCost: 10 })
+    mock.state.messages = [
+      makeAssistant({
+        cost: 10,
+        tokens: { input: 1, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },
+      }),
+    ]
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("attention notify failure resilience", () => {
   it("still toasts if attention.notify rejects", async () => {
     const mock = createMockApi()
     mock.notify.mockRejectedValueOnce(new Error("attention disabled"))
-    wireNotifications(mock.api, { maxTokens: 1, maxPercent: null })
+    wireNotifications(mock.api, { maxTokens: 1, maxPercent: null, maxCost: null })
     mock.state.messages = [
       makeAssistant({
         tokens: { input: 5, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },

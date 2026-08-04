@@ -42,7 +42,12 @@ describe("message helpers", () => {
 describe("usageForSession", () => {
   it("returns zeros when no qualifying assistant message exists", () => {
     const { api } = createMockApi({ messages: [] })
-    expect(usageForSession(api, "ses_1")).toEqual({ tokens: 0, contextWindow: 0, percent: 0 })
+    expect(usageForSession(api, "ses_1")).toEqual({
+      tokens: 0,
+      contextWindow: 0,
+      percent: 0,
+      cost: 0,
+    })
   })
 
   it("sums tokens and resolves model context window", () => {
@@ -50,6 +55,7 @@ describe("usageForSession", () => {
       messages: [
         makeAssistant({
           tokens: { input: 90, output: 10, reasoning: 0, cache: { read: 0, write: 0 } },
+          cost: 1.2345,
         }),
       ],
       contextWindow: 200,
@@ -58,6 +64,7 @@ describe("usageForSession", () => {
     expect(usageForSession(api, "ses_1").tokens).toBe(100)
     expect(usageForSession(api, "ses_1").contextWindow).toBe(200)
     expect(usageForSession(api, "ses_1").percent).toBe(50)
+    expect(usageForSession(api, "ses_1").cost).toBe(1.2345)
   })
 
   it("uses 0 context window when model is missing", () => {
@@ -73,7 +80,22 @@ describe("usageForSession", () => {
       tokens: 6,
       contextWindow: 0,
       percent: 0,
+      cost: 0,
     })
+  })
+
+  it("sanitizes missing, invalid, and negative message costs", () => {
+    for (const cost of [undefined, Number.NaN, -1]) {
+      const { api } = createMockApi({
+        messages: [
+          makeAssistant({
+            cost,
+            tokens: { input: 1, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },
+          }),
+        ],
+      })
+      expect(usageForSession(api, "ses_1").cost).toBe(0)
+    }
   })
 })
 
@@ -93,10 +115,16 @@ describe("activeSessionID / isOverLimit / sessionIDFromEvent", () => {
         }),
       ],
     })
-    expect(isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null }, "ses_1")).toBe(true)
-    expect(isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null })).toBe(true)
+    expect(
+      isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null, maxCost: null }, "ses_1"),
+    ).toBe(true)
+    expect(isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null, maxCost: null })).toBe(
+      true,
+    )
     mock.state.routeName = "home"
-    expect(isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null })).toBe(false)
+    expect(isOverLimit(mock.api, { maxTokens: 100_000, maxPercent: null, maxCost: null })).toBe(
+      false,
+    )
   })
 
   it("extracts sessionID from properties or data event shapes", () => {

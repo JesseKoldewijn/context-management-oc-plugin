@@ -15,18 +15,22 @@ describe("view-model", () => {
   })
 
   it("builds sidebar limit model from options", () => {
-    expect(sidebarLimitModel({ maxTokens: 100_000, maxPercent: 80 }, false, theme)).toEqual({
+    expect(
+      sidebarLimitModel({ maxTokens: 100_000, maxPercent: 80, maxCost: 1.25 }, false, theme),
+    ).toEqual({
       title: "Limit",
-      label: "100,000 tokens · 80% of context",
+      label: "100,000 tokens · 80% of context · $1.25 cost",
       color: "muted",
     })
-    expect(sidebarLimitModel({ maxTokens: 100_000, maxPercent: null }, true, theme).color).toBe(
-      "error",
-    )
+    expect(
+      sidebarLimitModel({ maxTokens: 100_000, maxPercent: null, maxCost: null }, true, theme).color,
+    ).toBe("error")
   })
 
   it("builds bottom-bar model with limit prefix", () => {
-    expect(bottomBarLimitModel({ maxTokens: null, maxPercent: 90 }, false, theme)).toEqual({
+    expect(
+      bottomBarLimitModel({ maxTokens: null, maxPercent: 90, maxCost: null }, false, theme),
+    ).toEqual({
       label: "limit · 90% of context",
       color: "muted",
     })

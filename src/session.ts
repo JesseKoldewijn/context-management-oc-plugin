@@ -20,7 +20,7 @@ export function lastAssistantWithOutput(
 export function usageForSession(api: TuiPluginApi, sessionID: string): UsageSnapshot {
   const messages = api.state.session.messages(sessionID)
   const last = lastAssistantWithOutput(messages)
-  if (!last) return { tokens: 0, contextWindow: 0, percent: 0 }
+  if (!last) return { tokens: 0, contextWindow: 0, percent: 0, cost: 0 }
 
   const model =
     api.state.provider.find((item) => item.id === last.providerID)?.models?.[last.modelID] ?? null
@@ -29,7 +29,7 @@ export function usageForSession(api: TuiPluginApi, sessionID: string): UsageSnap
       ? model.limit.context
       : 0
 
-  return computeUsage(last.tokens, contextWindow)
+  return computeUsage(last.tokens, contextWindow, last.cost)
 }
 
 export function activeSessionID(api: TuiPluginApi): string | undefined {

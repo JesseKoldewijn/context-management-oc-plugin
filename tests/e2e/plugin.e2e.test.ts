@@ -22,6 +22,13 @@ const meta = {
   fingerprint: "e2e",
 } as TuiPluginMeta
 
+function assistantWithCost(cost: number) {
+  return makeAssistant({
+    cost,
+    tokens: { input: 1, output: 1, reasoning: 0, cache: { read: 0, write: 0 } },
+  })
+}
+
 function run(
   command: string,
   args: string[],
@@ -86,7 +93,7 @@ describe("e2e OpenCode TUI config + plugin runtime", () => {
       configPath,
       JSON.stringify({
         $schema: "https://opencode.ai/tui.json",
-        plugin: [[root, { maxTokens: 1000, maxPercent: 50 }]],
+        plugin: [[root, { maxTokens: 1000, maxPercent: 50, maxCost: 10 }]],
       }),
       "utf8",
     )
@@ -105,7 +112,7 @@ describe("e2e OpenCode TUI config + plugin runtime", () => {
   it("drives a full under→over→rearm→over scenario on the real plugin entry", async () => {
     const mod = await import(pathToFileURL(join(root, "src/tui.tsx")).href)
     const mock = createMockApi({ contextWindow: 200 })
-    await mod.default.tui(mock.api, { maxTokens: 100, maxPercent: 50 }, meta)
+    await mod.default.tui(mock.api, { maxTokens: 100, maxPercent: 50, maxCost: 10 }, meta)
 
     mock.state.messages = [
       makeAssistant({
@@ -158,5 +165,27 @@ describe("e2e OpenCode TUI config + plugin runtime", () => {
       /No renderer found/,
     )
     expect(() => registration.slots.app_bottom(ctx)).toThrow(/No renderer found/)
+  })
+
+  it("drives a cost-only under-to-over-to-rearm lifecycle", async () => {
+    const mod = await import(pathToFileURL(join(root, "src/tui.tsx")).href)
+    const mock = createMockApi()
+    await mod.default.tui(mock.api, { maxTokens: null, maxPercent: null, maxCost: 1 }, meta)
+
+    mock.state.messages = [assistantWithCost(0.5)]
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(0)
+
+    mock.state.messages = [assistantWithCost(1)]
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(1)
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(1)
+
+    mock.state.messages = [assistantWithCost(0)]
+    mock.emit("message.removed", { properties: { sessionID: "ses_1" } })
+    mock.state.messages = [assistantWithCost(1.25)]
+    mock.emit("message.updated", { properties: { sessionID: "ses_1" } })
+    expect(mock.toast).toHaveBeenCalledTimes(2)
   })
 })

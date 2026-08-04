@@ -86,4 +86,14 @@
 
 **Decision.** Evaluate both limits independently. A notification fires when **any** enabled limit is crossed. Both can be active simultaneously and both are displayed in the UI.
 
-**Consequences.** Maximum flexibility for the user. The plugin works for: token-only, percent-only, both, or neither (though disabling both effectively disables the plugin). The OR logic is intuitive and matches user expectations.
+**Consequences.** Maximum flexibility for the user. The plugin works for token-only, percent-only, cost-only, any combination, or none. The OR logic is intuitive and matches user expectations.
+
+---
+
+## 10. Latest-message cost evaluation
+
+**Context.** Assistant messages expose a cost alongside token usage. A cost limit could either represent the latest response or accumulate across a session.
+
+**Decision.** Use the latest qualifying assistant message's cost, matching the existing latest-message token model. Cost is evaluated in USD and participates in the same OR evaluation as token and percent limits.
+
+**Consequences.** This is the smallest behavioral change and keeps cost consistent with the current usage snapshot. It does not represent a cumulative session budget; cumulative accounting would require additional handling for compaction and message removal.
