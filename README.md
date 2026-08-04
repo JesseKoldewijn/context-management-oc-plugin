@@ -12,13 +12,31 @@ Requires OpenCode >= 1.4.3 (TUI plugin system).
 
 ### 1. Install from GitHub Packages
 
-Configure npm to use GitHub Packages for this scope (once per machine). Use a GitHub personal access token with `read:packages`:
+Configure npm to use GitHub Packages for this scope (once per machine). Use a GitHub personal access token with `read:packages`.
 
-```bash
+For a literal token, add this to `~/.npmrc`:
+
+```ini
 # ~/.npmrc
 @jessekoldewijn:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 ```
+
+Alternatively, store the token in an environment variable. The variable must be exported in the shell before running npm:
+
+```bash
+export GH_CM_OPENCODE_PLUGIN_TOKEN=YOUR_GITHUB_TOKEN
+```
+
+Then reference it from `~/.npmrc` using `${...}` expansion:
+
+```ini
+# ~/.npmrc
+@jessekoldewijn:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GH_CM_OPENCODE_PLUGIN_TOKEN}
+```
+
+Without `${...}`, npm passes the variable name literally as the token and GitHub Packages rejects the request.
 
 Then install:
 
