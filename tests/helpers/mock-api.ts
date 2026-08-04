@@ -15,6 +15,7 @@ export function makeAssistant(partial: {
   id?: string
   sessionID?: string
   tokens: AssistantMessage["tokens"]
+  cost?: number
   providerID?: string
   modelID?: string
 }): AssistantMessage {
@@ -29,7 +30,7 @@ export function makeAssistant(partial: {
     mode: "build",
     agent: "build",
     path: { cwd: "/tmp", root: "/tmp" },
-    cost: 0,
+    cost: partial.cost ?? 0,
     tokens: partial.tokens,
   }
 }

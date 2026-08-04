@@ -45,6 +45,7 @@ Add the plugin to your TUI config (`~/.config/opencode/tui.json` on macOS/Linux,
       {
         "maxTokens": 100000,
         "maxPercent": 80,
+        "maxCost": 5.0,
       },
     ],
   ],
@@ -59,16 +60,18 @@ Open a session. You should see **Limit** in the sidebar and a compact `limit · 
 
 ## Options
 
-| Option       | Default  | Description                                                  |
-| ------------ | -------- | ------------------------------------------------------------ |
-| `maxTokens`  | `100000` | Absolute token ceiling. Set to `null` or `false` to disable. |
-| `maxPercent` | unset    | Percent of model context window (0–100). Omit to disable.    |
+| Option       | Default  | Description                                                                |
+| ------------ | -------- | -------------------------------------------------------------------------- |
+| `maxTokens`  | `100000` | Absolute token ceiling. Set to `null` or `false` to disable.               |
+| `maxPercent` | unset    | Percent of model context window (0–100). Omit to disable.                  |
+| `maxCost`    | unset    | Latest assistant message cost in USD. Set to `null` or `false` to disable. |
 
 Omit options entirely to use **maxTokens: 100000** only. Notification fires when **any** enabled limit is reached.
 
 - **`maxTokens`** — hard ceiling independent of the model (good for cost budgets)
 - **`maxPercent`** — scales with each model's context window (good when you switch models)
-- Use both together if you want either condition to alert you
+- **`maxCost`** — latest assistant message cost in USD, preserving fractional currency values
+- Use any combination together if you want any condition to alert you; limits use OR semantics
 
 ### Desktop notifications
 
@@ -91,7 +94,7 @@ Sidebar           Bottom bar (when sidebar is closed)
 ─────────         ──────────────
 Limit             limit · 100,000 tokens · 80% of context
 100,000 tokens
-· 80% of context
+· 80% of context · $5.00 cost
 ```
 
 When you cross the limit, the label turns red and you get a toast (plus a desktop notification if attention is enabled). Alerts fire **once per crossing** — after `/compact` drops you back under the limit, the next crossing can notify again.

@@ -33,8 +33,8 @@ Responsibilities:
 Defines `PluginOptionsInput` (what the user writes in `tui.json`) and `NormalizedOptions` (the parsed, validated result).
 
 - `DEFAULT_MAX_TOKENS = 100_000`
-- `normalizeOptions()` floors token values, clamps percent to 0–100, allows `null`/`false`/omission to disable a limit
-- Returns `{ maxTokens, maxPercent }` where omitted/unset means `undefined` (not evaluated)
+- `normalizeOptions()` floors token values, clamps percent to 0–100, preserves finite non-negative cost values, and allows `null`/`false`/omission to disable a limit
+- Returns `{ maxTokens, maxPercent, maxCost }`, where `maxCost` is denominated in USD
 
 ### `session.ts` — Data access layer
 
@@ -43,7 +43,7 @@ Bridge between OpenCode API message events and the usage/threshold logic.
 - `activeSessionID()` — reads current session from the API routes
 - `sessionIDFromEvent()` — extracts session ID from event payload shapes
 - `lastAssistantWithOutput()` — finds the latest assistant message that has `output` tokens
-- `usageForSession()` — resolves messages for a session, finds the model's context window size, delegates to `computeUsage()`
+- `usageForSession()` — resolves messages for a session, finds the model's context window size, carries the latest assistant cost, and delegates to `computeUsage()`
 - `isOverLimit()` — convenience that chains session resolution → usage computation → threshold evaluation
 
 ### `usage.ts` — Core business logic
@@ -52,10 +52,10 @@ Pure computation functions with no API or side-effect dependencies.
 
 - `safeNumber()` — sanitizes potentially missing numeric values
 - `sumTokens()` — sums all token categories (input + output + reasoning + cache_read + cache_write)
-- `computeUsage()` — returns `UsageSnapshot` with total tokens, context window size, and usage percent
-- `evaluateThreshold()` — compares usage against `maxTokens` and/or `maxPercent`; returns status for each
+- `computeUsage()` — returns `UsageSnapshot` with total tokens, context window size, usage percent, and latest assistant cost
+- `evaluateThreshold()` — compares usage against `maxTokens`, `maxPercent`, and/or `maxCost`; returns status for each
 - `decideCrossing()` — implements once-per-crossing logic with re-arm. Returns `"cross"` when the limit is newly exceeded, `"recross"` after a prior crossing has been re-armed (usage dropped below limit), and `"noop"` otherwise.
-- `formatInt()` / `formatThresholdLabel()` / `buildNotifyMessage()` — human-readable formatting helpers
+- `formatInt()` / `formatCost()` / `formatThresholdLabel()` / `buildNotifyMessage()` — human-readable formatting helpers
 
 ### `view-model.ts` — UI display models
 
@@ -98,7 +98,7 @@ tui.json loaded
 message.updated / message.removed
   → lookup session ID
   → compute usage for that session
-  → evaluate threshold (maxTokens / maxPercent)
+  → evaluate threshold (maxTokens / maxPercent / maxCost)
   → decideCrossing (armed/not-armed/over/under)
   → if crossing: toast + desktop notification
   → update armed state

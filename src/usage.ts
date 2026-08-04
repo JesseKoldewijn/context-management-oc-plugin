@@ -14,12 +14,14 @@ export type UsageSnapshot = {
   tokens: number
   contextWindow: number
   percent: number
+  cost: number
 }
 
 export type ThresholdHit = {
   over: boolean
   byTokens: boolean
   byPercent: boolean
+  byCost: boolean
 }
 
 export type CrossingDecision = {
@@ -45,21 +47,23 @@ export function sumTokens(tokens: TokenCounts): number {
   )
 }
 
-export function computeUsage(tokens: TokenCounts, contextWindow: number): UsageSnapshot {
+export function computeUsage(tokens: TokenCounts, contextWindow: number, cost = 0): UsageSnapshot {
   const used = sumTokens(tokens)
   const window = safeNumber(contextWindow)
   const percent = window > 0 ? Math.round((used / window) * 100) : 0
-  return { tokens: used, contextWindow: window, percent }
+  return { tokens: used, contextWindow: window, percent, cost: safeNumber(cost) }
 }
 
 export function evaluateThreshold(usage: UsageSnapshot, options: NormalizedOptions): ThresholdHit {
   const byTokens = options.maxTokens !== null && usage.tokens >= options.maxTokens
   const byPercent =
     options.maxPercent !== null && usage.contextWindow > 0 && usage.percent >= options.maxPercent
+  const byCost = options.maxCost !== null && usage.cost >= options.maxCost
   return {
-    over: byTokens || byPercent,
+    over: byTokens || byPercent || byCost,
     byTokens,
     byPercent,
+    byCost,
   }
 }
 
@@ -81,6 +85,15 @@ export function formatInt(n: number): string {
   return Math.round(n).toLocaleString("en-US")
 }
 
+export function formatCost(n: number): string {
+  return n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 20,
+  })
+}
+
 /** Human-readable configured threshold(s) for the sidebar (not live usage). */
 export function formatThresholdLabel(options: NormalizedOptions): string {
   const parts: string[] = []
@@ -90,6 +103,9 @@ export function formatThresholdLabel(options: NormalizedOptions): string {
   if (options.maxPercent !== null) {
     parts.push(`${options.maxPercent}% of context`)
   }
+  if (options.maxCost !== null) {
+    parts.push(`${formatCost(options.maxCost)} cost`)
+  }
   return parts.length > 0 ? parts.join(" · ") : "none"
 }
 
@@ -98,13 +114,19 @@ export function buildNotifyMessage(
   hit: ThresholdHit,
   options: NormalizedOptions,
 ): string {
-  const parts: string[] = [`${formatInt(usage.tokens)} tokens used`]
+  const parts: string[] = [
+    `${formatInt(usage.tokens)} tokens used`,
+    `${formatCost(usage.cost)} cost used`,
+  ]
   const reasons: string[] = []
   if (hit.byTokens && options.maxTokens !== null) {
     reasons.push(`maxTokens ${formatInt(options.maxTokens)}`)
   }
   if (hit.byPercent && options.maxPercent !== null) {
     reasons.push(`maxPercent ${options.maxPercent}%`)
+  }
+  if (hit.byCost && options.maxCost !== null) {
+    reasons.push(`maxCost ${formatCost(options.maxCost)}`)
   }
   if (reasons.length > 0) {
     parts.push(`(hit ${reasons.join(" and ")})`)
